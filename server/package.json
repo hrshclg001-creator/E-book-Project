@@ -9,12 +9,14 @@
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.9.1",
     "multer": "^2.2.0"
   },
