@@ -27,14 +27,15 @@ const createBook = asyncHandler(async (req, res) => {
 
 
   // 4. Cloudinary se mile URLs ko MongoDB mein save karna
-  const book = await Book.create({ 
-      title, 
-      author, 
-      description, 
-      price,
-      category,
-      coverImage: coverImage.url, // Yahan Cloudinary ka URL save ho raha hai
-      pdfUrl: pdfFile.url         // Yahan PDF ka URL save ho raha hai
+  const book = await Book.create({
+    title,
+    author,
+    description,
+    price,
+    category,
+    coverImage: coverImage.url, // Yahan Cloudinary ka URL save ho raha hai
+    pdfUrl: pdfFile.url, // Yahan PDF ka URL save ho raha hai
+    owner: req.user._id,
   });
 
   return res
