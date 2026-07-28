@@ -24,6 +24,6 @@ export const loginUserAPI = async(userData) => {
 	} catch (error) {
 		throw error.response?.data || error.message;
 	}
-}
+};
 
 export default apiClient;
