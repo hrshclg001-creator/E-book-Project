@@ -15,6 +15,10 @@ const cartSchema = new mongoose.Schema(
           ref: "Book",
           required: true,
         },
+        quantity: {
+          type: Number,
+          required: true,
+        },
       },
     ],
     cartTotal: { type: Number, default: 0 },
