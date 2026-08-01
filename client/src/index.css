@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+@theme {
+  /* Color Palette based on the provided images */
+  --color-book-teal-dark: #1f3331; /* Deep background from the hero/nav */
+  --color-book-teal: #274340;      /* Slightly lighter teal */
+  --color-book-cream: #f6f5f1;     /* Main off-white background */
+  --color-book-rust: #d36a50;      /* The terracotta/orange from buttons */
+  --color-book-rust-hover: #bc563e;
+  --color-book-text: #2a2a2a;      /* Dark text for light mode */
+  --color-book-gray: #e6e4de;      /* For subtle borders */
+
+  /* Typography */
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+/* Global Styles */
+@layer base {
+  body {
+    background-color: var(--color-book-cream);
+    color: var(--color-book-text);
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+  }
+}

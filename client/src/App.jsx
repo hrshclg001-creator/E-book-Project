@@ -1,28 +1,22 @@
 import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
 
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        {
-          //for navbar
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            //Aage ke routes jaise /dashboard ya /upload yahan aayenge
-          </Routes>
-        }
-      </div>
-    </Router>
+    <BrowserRouter>
+      <Routes>
+        {/* Layout wrapper ke andar aane wale sabhi routes */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          {/* Aage chalkar hum yahan aur routes add karenge: 
+          <Route path="login" element={<Login />} />
+          <Route path="books" element={<Books />} />
+          */}
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

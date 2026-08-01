@@ -8,7 +8,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import PDFDocument from "pdfkit";
 import { sendEmail } from "../utils/sendEmail.js";
 import readingProgressModel from "../models/readingProgress.model.js";
-
+import { sendOrderConfirmationEmail } from "../services/email.service.js";
 const createPaymentOrder = asyncHandler(async (req, res) => {
   try {
     // fecthing the cart of current user
@@ -64,15 +64,14 @@ const createPaymentOrder = asyncHandler(async (req, res) => {
 
 // verification of payment signature
 const verifyPayment = asyncHandler(async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-    req.body;
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     throw new ApiError(400, "Payment details are missing");
   }
+
   // 1. Expected signature generation
   const body = razorpay_order_id + "|" + razorpay_payment_id;
-
   const expectedSignature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
     .update(body.toString())
@@ -82,6 +81,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
   const isAuthentic = expectedSignature === razorpay_signature;
 
   if (isAuthentic) {
+    // Populate user to get email for the confirmation
     const order = await Order.findOneAndUpdate(
       { razorpayOrderId: razorpay_order_id },
       {
@@ -89,25 +89,28 @@ const verifyPayment = asyncHandler(async (req, res) => {
         razorpayPaymentId: razorpay_payment_id,
         razorpaySignature: razorpay_signature,
       },
-      { new: true },
-    );
+      { new: true }
+    ).populate("user", "name email"); // Populate kiya taaki email bhej sakein
 
-	for (const item of order.items) {
-    const existingProgress = await readingProgressModel.findOne({
-      user: order.user,
-      book: item.book,
-    });
-
-    // Agar pehle se library mein nahi hai, toh add karein
-    if (!existingProgress) {
-      await readingProgressModel.create({
-        user: order.user,
+    // 3. Update Reading Progress
+    for (const item of order.items) {
+      const existingProgress = await readingProgressModel.findOne({
+        user: order.user._id,
         book: item.book,
-        progressPercentage: 0,
-        isCompleted: false,
       });
-    }
-  }
+
+      if (!existingProgress) {
+        await readingProgressModel.create({
+          user: order.user._id,
+          book: item.book,
+          progressPercentage: 0,
+          isCompleted: false,
+        });
+      }
+    } // <-- LOOP YAHAN CLOSE HUA
+
+    // Order confirmation email bhejein
+    await sendOrderConfirmationEmail(order.user.email, order.user.name, order);
 
     // 4. User ki cart clear kar dein kyunki payment ho chuki hai
     await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
@@ -119,10 +122,11 @@ const verifyPayment = asyncHandler(async (req, res) => {
     // Payment failure case
     await Order.findOneAndUpdate(
       { razorpayOrderId: razorpay_order_id },
-      { paymentStatus: "FAILED" },
+      { paymentStatus: "FAILED" }
     );
     throw new ApiError(400, "Payment verification failed. Signature mismatch.");
   }
+});
   // handling payment failure
   const handlePaymentFailure = asyncHandler(async (req, res) => {
     const { razorpay_order_id, reason } = req.body;
@@ -262,4 +266,3 @@ const verifyPayment = asyncHandler(async (req, res) => {
     updateOrderStatus,
     generateAndSendInvoice,
   };
-});

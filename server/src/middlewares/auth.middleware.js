@@ -32,14 +32,22 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
   }
 });
 
-export const authorizedRoles = ( ...roles) =>{
-  return (req, res,next) => {
-    if( !roles.includes(req.user.role)){
+export const authorizedRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
       throw new ApiError(
         403,
-        `Role : ${req.user.role} is not allowed to access this resource`
-      )
+        `Role : ${req.user.role} is not allowed to access this resource`,
+      );
     }
     next();
+  };
+};
+
+export const verifyAdmin = asyncHandler(async (req, res, next) => {
+  if (req.user && req.user.role === "admin") {
+    next();
+  } else {
+    throw new ApiError(403, "Access denied. Admin resources only.");
   }
-}
+})
