@@ -7,6 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import PDFDocument from "pdfkit";
 import { sendEmail } from "../utils/sendEmail.js";
+import readingProgressModel from "../models/readingProgress.model.js";
 
 const createPaymentOrder = asyncHandler(async (req, res) => {
   try {
@@ -90,6 +91,24 @@ const verifyPayment = asyncHandler(async (req, res) => {
       },
       { new: true },
     );
+
+	for (const item of order.items) {
+    const existingProgress = await readingProgressModel.findOne({
+      user: order.user,
+      book: item.book,
+    });
+
+    // Agar pehle se library mein nahi hai, toh add karein
+    if (!existingProgress) {
+      await readingProgressModel.create({
+        user: order.user,
+        book: item.book,
+        progressPercentage: 0,
+        isCompleted: false,
+      });
+    }
+  }
+
     // 4. User ki cart clear kar dein kyunki payment ho chuki hai
     await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
 
@@ -231,6 +250,9 @@ const verifyPayment = asyncHandler(async (req, res) => {
       return res.status(200).send(pdfData);
     });
   });
+
+
+
 
   export {
     createPaymentOrder,
