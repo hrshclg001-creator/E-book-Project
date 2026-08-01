@@ -1,95 +1,107 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { loginUserAPI } from "../services/api";
+import { Link } from "react-router-dom";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await loginUserAPI(formData);
-      // Agar backend token bhejta hai, toh aap use localStorage/context mein save kar sakte hain
-      // Example: localStorage.setItem("token", response.data.accessToken);
-
-      // Login successful hone ke baad home ya dashboard par bhej dein
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.message || "Invalid credentials. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    // API integration for login will go here
+    console.log("Login attempt:", formData);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800">
-          Welcome Back to BookVerse
-        </h2>
+    <div className="flex min-h-screen bg-book-cream">
+      {/* Left Side - Image Showcase */}
+      <div className="hidden lg:block lg:w-1/2 relative bg-book-gray">
+        <img
+          src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1000&auto=format&fit=crop"
+          alt="Library aesthetic"
+          className="absolute inset-0 w-full h-full object-cover opacity-90"
+        />
+        <div className="absolute inset-0 bg-book-teal/20 mix-blend-multiply"></div>
+        <div className="absolute bottom-12 left-12 text-white max-w-md">
+          <h2 className="font-serif text-4xl font-bold mb-4">Welcome Back.</h2>
+          <p className="font-sans text-white/80 text-lg">
+            Continue your journey through our curated collection of timeless
+            stories and technical masterpieces.
+          </p>
+        </div>
+      </div>
 
-        {error && <p className="text-red-600 text-center">{error}</p>}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="john@example.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 mt-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="••••••••"
-            />
+      {/* Right Side - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12">
+        <div className="w-full max-w-md">
+          <div className="mb-10 text-center lg:text-left">
+            <h1 className="text-3xl font-serif font-bold text-book-text mb-2">
+              Sign In
+            </h1>
+            <p className="text-book-text/60 font-sans">
+              Enter your details to access your account.
+            </p>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full px-4 py-2 text-white font-bold rounded-md ${
-              loading ? "bg-indigo-300" : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
-          >
-            {loading ? "Logging in..." : "Log In"}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-sans font-medium text-book-text/80 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full bg-transparent border-b border-book-gray focus:border-book-teal py-2 text-book-text outline-none transition-colors"
+                placeholder="reader@bookverse.com"
+              />
+            </div>
 
-        <p className="text-sm text-center text-gray-600">
-          Don't have an account?{" "}
-          <Link to="/register" className="text-indigo-600 hover:underline">
-            Sign up here
-          </Link>
-        </p>
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-sans font-medium text-book-text/80">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-sans text-book-teal hover:text-book-rust transition-colors"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full bg-transparent border-b border-book-gray focus:border-book-teal py-2 text-book-text outline-none transition-colors"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-book-text hover:bg-book-teal text-white font-sans font-medium py-3.5 rounded-sm transition-colors duration-300 mt-8"
+            >
+              Sign In
+            </button>
+          </form>
+
+          <p className="mt-8 text-center font-sans text-sm text-book-text/70">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-book-teal font-medium hover:underline"
+            >
+              Create one now
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
