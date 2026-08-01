@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
+import useDarkMode from "../hooks/useDarkMode";
 const Navbar = () => {
+	const { theme, toggleTheme } = useDarkMode();
   return (
     <nav className="bg-book-teal text-book-cream shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,7 +15,12 @@ const Navbar = () => {
             >
               BOOKVERSE
             </Link>
-
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+            </button>
             <div className="hidden md:flex items-center space-x-6 text-sm font-medium text-book-cream/80">
               <Link to="/" className="hover:text-white transition-colors">
                 Home

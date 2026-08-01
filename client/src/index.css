@@ -14,10 +14,11 @@
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
 }
-
+@variant dark (&:where(.dark, .dark *));
 /* Global Styles */
 @layer base {
   body {
+	@apply transition-colors duration-300;
     background-color: var(--color-book-cream);
     color: var(--color-book-text);
     font-family: var(--font-sans);
