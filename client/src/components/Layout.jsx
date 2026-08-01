@@ -5,7 +5,8 @@ import Footer from "./Footer";
 
 const Layout = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
+    // Yahan humne 'bg-book-cream' (light) aur 'dark:bg-gray-900' (dark) add kiya hai
+    <div className="flex flex-col min-h-screen bg-book-cream dark:bg-gray-900 text-book-text dark:text-gray-100 transition-colors duration-300">
       <Navbar />
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Outlet />

@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@variant dark (&:where(.dark, .dark *));
 @theme {
   /* Color Palette based on the provided images */
   --color-book-teal-dark: #1f3331; /* Deep background from the hero/nav */
@@ -14,7 +14,7 @@
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
 }
-@variant dark (&:where(.dark, .dark *));
+
 /* Global Styles */
 @layer base {
   body {
