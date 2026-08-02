@@ -2,26 +2,29 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const Wishlist = () => {
-  const wishlistItems = [
-    {
-      id: 3,
-      title: "Atomic Habits",
-      author: "James Clear",
-      price: 450,
-      category: "Self-Help",
-      cover:
-        "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      id: 4,
-      title: "Dune",
-      author: "Frank Herbert",
-      price: 599,
-      category: "Sci-Fi",
-      cover:
-        "https://images.unsplash.com/photo-1614213193960-e4b9d0dc6a06?q=80&w=800&auto=format&fit=crop",
-    },
-  ];
+  const fetchWishlistItems = async()=>{
+
+  }
+  // const wishlistItems = [
+  //   {
+  //     id: 3,
+  //     title: "Atomic Habits",
+  //     author: "James Clear",
+  //     price: 450,
+  //     category: "Self-Help",
+  //     cover:
+  //       "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop",
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Dune",
+  //     author: "Frank Herbert",
+  //     price: 599,
+  //     category: "Sci-Fi",
+  //     cover:
+  //       "https://images.unsplash.com/photo-1614213193960-e4b9d0dc6a06?q=80&w=800&auto=format&fit=crop",
+  //   },
+  // ];
 
   return (
     <div className="w-full bg-book-cream min-h-screen py-16">

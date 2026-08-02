@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import useDarkMode from "../hooks/useDarkMode";
+import { AuthContext } from "../context/AuthContext";
 const Navbar = () => {
-	const { theme, toggleTheme } = useDarkMode();
+  const { theme, toggleTheme } = useDarkMode();
+  const { user } = useContext(AuthContext); // Global state se user fetch karein
   return (
     <nav className="bg-book-teal text-book-cream shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -101,28 +103,42 @@ const Navbar = () => {
                 </svg>
               )}
             </button>
-            {/* User Account */}
-            <Link
-              to="/login"
-              className="flex items-center gap-2 hover:text-book-rust transition-colors text-sm font-medium"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5"
+            {/* Dynamic User Account Link */}
+            {user ? (
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-                />
-              </svg>
-              <span className="hidden md:block">My Account</span>
-            </Link>
-
+                <div className="w-7 h-7 rounded-full bg-book-rust text-white flex items-center justify-center font-bold text-xs">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="hidden md:block">
+                  {user.name.split(" ")[0]}
+                </span>
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                  />
+                </svg>
+                <span className="hidden md:block">Login</span>
+              </Link>
+            )}
+            {/* Cart */}
             <Link
               to="/cart"
               className="flex items-center hover:text-book-rust transition-colors relative"

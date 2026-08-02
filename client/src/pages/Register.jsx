@@ -1,26 +1,47 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { registerUserAPI } from "../services/api";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    // API integration for registration will go here
-    console.log("Register attempt:", formData);
+
+    try {
+      setIsSubmitting(true);
+      // Backend API call
+      await registerUserAPI({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      toast.success(
+        "Account created! Please check your email to verify your account before logging in.",
+      );
+      navigate("/login");
+    } catch (error) {
+      toast.error(error.message || "Registration failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

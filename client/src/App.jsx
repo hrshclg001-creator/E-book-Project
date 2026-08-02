@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import Layout from "./components/Layout";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 // ======================================================
 // Global Loader
 // ======================================================

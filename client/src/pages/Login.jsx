@@ -1,17 +1,34 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { AuthContext } from "../context/AuthContext";
 const Login = () => {
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: "", password: "" });
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // API integration for login will go here
-    console.log("Login attempt:", formData);
+    try {
+      setIsSubmitting(true);
+      // Context ka login function call karein[cite: 3]
+      await login(formData.email, formData.password);
+
+      toast.success("Welcome back to BookVerse!");
+      navigate("/dashboard"); // Login ke baad seedha dashboard par bhej dein
+    } catch (error) {
+      // Agar backend 'isEmailVerified' false hone par 401 throw karta hai[cite: 4]
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Invalid email or password";
+      toast.error(errorMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

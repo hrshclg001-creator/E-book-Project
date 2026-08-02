@@ -1,23 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-
+import api from "../api/axios";
 const EmailVerification = () => {
   const { token } = useParams();
   const [status, setStatus] = useState("loading"); // 'loading', 'success', 'error'
+  const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    // Yahan actual API call aayegi jo token verify karegi
-    // Abhi ke liye hum timeout se mock kar rahe hain
-    const verifyToken = setTimeout(() => {
-      if (token) {
-        setStatus("success");
-      } else {
-        setStatus("error");
-      }
-    }, 2000);
 
-    return () => clearTimeout(verifyToken);
-  }, [token]);
+  
+
+useEffect(() => {
+  const verifyToken = async () => {
+    try {
+      // Backend API call to verify the email token
+      const response = await api.get(`/users/verify-email/${token}`);
+      setStatus("success");
+      setMessage(
+        response.message || "Your account has been successfully verified.",
+      );
+    } catch (error) {
+      setStatus("error");
+      setMessage(
+        error.response?.data?.message ||
+          "The verification link is invalid or has expired.",
+      );
+    }
+  };
+
+  if (token) {
+    verifyToken();
+  } else {
+    setStatus("error");
+    setMessage("No verification token provided.");
+  }
+}, [token]);
 
   return (
     <div className="min-h-screen bg-book-cream flex items-center justify-center p-4">
@@ -90,8 +106,7 @@ const EmailVerification = () => {
               Verification Failed
             </h1>
             <p className="text-sm font-sans text-book-text/60 mb-8">
-              The verification link is invalid or has expired. Please request a
-              new one.
+              {message}
             </p>
             <Link
               to="/login"
