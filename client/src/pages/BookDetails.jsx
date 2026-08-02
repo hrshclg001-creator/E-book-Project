@@ -1,21 +1,93 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import ReviewsSection from "../components/ReviewsSection";
+import { useEffect } from "react";
+import { getBookById } from "../api/books.api";
+
 // Wahi same mock data jo Books.jsx mein use kiya tha
 const mockBooks = [
-  { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", price: 299, category: "Classic", cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop", description: "A true classic of twentieth-century literature, this edition has been updated by Fitzgerald scholar James L.W. West III to include the author’s final revisions and features a note on the composition and text, a personal history of the novel." },
-  { id: 2, title: "Deep Learning", author: "Ian Goodfellow", price: 899, category: "Academic", cover: "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=800&auto=format&fit=crop", description: "An introduction to a broad range of topics in deep learning, covering mathematical and conceptual background, deep learning techniques used in industry, and research perspectives." },
-  { id: 3, title: "Atomic Habits", author: "James Clear", price: 450, category: "Self-Help", cover: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop", description: "No matter your goals, Atomic Habits offers a proven framework for improving--every day. James Clear, one of the world's leading experts on habit formation, reveals practical strategies that will teach you exactly how to form good habits." },
-  { id: 4, title: "Dune", author: "Frank Herbert", price: 599, category: "Sci-Fi", cover: "https://images.unsplash.com/photo-1614213193960-e4b9d0dc6a06?q=80&w=800&auto=format&fit=crop", description: "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the 'spice' melange." }
+  {
+    id: 1,
+    title: "The Great Gatsby",
+    author: "F. Scott Fitzgerald",
+    price: 299,
+    category: "Classic",
+    cover:
+      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop",
+    description:
+      "A true classic of twentieth-century literature, this edition has been updated by Fitzgerald scholar James L.W. West III to include the author’s final revisions and features a note on the composition and text, a personal history of the novel.",
+  },
+  {
+    id: 2,
+    title: "Deep Learning",
+    author: "Ian Goodfellow",
+    price: 899,
+    category: "Academic",
+    cover:
+      "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=800&auto=format&fit=crop",
+    description:
+      "An introduction to a broad range of topics in deep learning, covering mathematical and conceptual background, deep learning techniques used in industry, and research perspectives.",
+  },
+  {
+    id: 3,
+    title: "Atomic Habits",
+    author: "James Clear",
+    price: 450,
+    category: "Self-Help",
+    cover:
+      "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop",
+    description:
+      "No matter your goals, Atomic Habits offers a proven framework for improving--every day. James Clear, one of the world's leading experts on habit formation, reveals practical strategies that will teach you exactly how to form good habits.",
+  },
+  {
+    id: 4,
+    title: "Dune",
+    author: "Frank Herbert",
+    price: 599,
+    category: "Sci-Fi",
+    cover:
+      "https://images.unsplash.com/photo-1614213193960-e4b9d0dc6a06?q=80&w=800&auto=format&fit=crop",
+    description:
+      "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the 'spice' melange.",
+  },
 ];
 
 const BookDetails = () => {
   const { id } = useParams();
-  const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('description');
 
-  // Find book by ID (Fallback to first book if ID not found in mock data)
-  const book = mockBooks.find(b => b.id === parseInt(id)) || mockBooks[0];
+  const [book, setBook] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState("description");
+
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        setLoading(true);
+
+        const data = await getBookById(id);
+
+        setBook(data);
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to load book");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBook();
+  }, [id]);
+
+  if (loading) {
+    return <h2>Loading...</h2>;
+  }
+
+  if (error) {
+    return <h2>{error}</h2>;
+  }
+
 
   const handleAddToCart = () => {
     // Yahan Redux/Context API ka logic aayega
@@ -46,7 +118,7 @@ const BookDetails = () => {
             <div className="w-full max-w-md bg-white p-4 shadow-2xl rounded-sm">
               <div className="relative aspect-[2/3] overflow-hidden bg-book-gray/20">
                 <img
-                  src={book.cover}
+                  src={book.coverImage}
                   alt={book.title}
                   className="w-full h-full object-cover"
                 />

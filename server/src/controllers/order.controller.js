@@ -13,7 +13,7 @@ const createPaymentOrder = asyncHandler(async (req, res) => {
   try {
     // fecthing the cart of current user
     const cart = await Cart.findOne({
-      user: req.user_id,
+      user: req.user._id,
     }).populate("items-book");
 
     if (!cart || cart.items.length === 0) {

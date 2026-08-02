@@ -1,77 +1,100 @@
-# API Calls Guide for the Frontend
+# API Calls Tutorial for the Frontend
 
-This file shows how to replace mock data in the frontend pages with real API calls from the backend.
+This guide explains how to replace the frontend’s mock data with real data from the backend, page by page.
 
-## 1. Use the shared API client
+## 1. Understand the backend response format
+
+The backend does not return raw arrays directly. It returns an `ApiResponse` object.
+
+### Example response
+
+```json
+{
+  "success": true,
+  "message": "Books fetched successfully",
+  "data": {
+    "books": [],
+    "pagination": {
+      "totalBooks": 10,
+      "totalPages": 2,
+      "currentPage": 1,
+      "limit": 10
+    }
+  }
+}
+```
+
+### Important rule
+
+When you call the API from the frontend, always read the data from:
+
+```js
+response.data.data;
+```
+
+So if the backend returns books, use:
+
+```js
+const books = response.data?.data?.books || [];
+```
+
+---
+
+## 2. Use the shared API client
 
 The frontend already has a shared Axios instance in [client/src/api/axios.js](client/src/api/axios.js).
 
 ```js
 import api from "../api/axios";
+```
 
+This client already includes:
+
+- the base URL
+- cookie support
+- the correct JSON headers
+
+### Example: simple GET request
+
+```js
 const response = await api.get("/books");
-const data = response.data?.data;
-```
-
-Important note:
-
-- The backend wraps data in an `ApiResponse` object.
-- In most cases, the real data is inside `response.data.data`.
-
----
-
-## 2. Auth pages
-
-### Login page
-
-Use this for real login:
-
-- Endpoint: `POST /api/v1/users/login`
-- Page: [client/src/pages/Login.jsx](client/src/pages/Login.jsx)
-
-```js
-const response = await api.post("/users/login", {
-  email,
-  password,
-});
-
-const { user, accessToken } = response.data.data;
-localStorage.setItem("accessToken", accessToken);
-localStorage.setItem("user", JSON.stringify(user));
-```
-
-### Register page
-
-Use this for real signup:
-
-- Endpoint: `POST /api/v1/users/register`
-- Page: [client/src/pages/Register.jsx](client/src/pages/Register.jsx)
-
-```js
-await api.post("/users/register", {
-  name,
-  email,
-  password,
-});
+console.log(response.data);
 ```
 
 ---
 
-## 3. Books page
+## 3. How to connect the Books page to the backend
 
-### Current problem
+The current file [client/src/pages/Books.jsx](client/src/pages/Books.jsx) uses mock data such as `mockBooks` and filters it locally.
 
-The page [client/src/pages/Books.jsx](client/src/pages/Books.jsx) uses static mock data.
+To make it real, you need to:
 
-### Replace with real books
+1. remove the hard-coded array
+2. store fetched books in state
+3. fetch them when the page loads
+4. apply filters on top of the real response
+
+### Step 1: add the required states
+
+```js
+const [books, setBooks] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+```
+
+### Step 2: fetch the books from the backend
+
+Use the GET route:
 
 - Endpoint: `GET /api/v1/books`
-- Supports query params: `keyword`, `category`, `minPrice`, `maxPrice`, `page`, `limit`
 
 ```js
 useEffect(() => {
   const fetchBooks = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const response = await api.get("/books", {
         params: {
           keyword: searchTerm,
@@ -85,8 +108,11 @@ useEffect(() => {
 
       const result = response.data?.data;
       setBooks(result?.books || []);
-    } catch (error) {
-      console.error("Failed to load books", error);
+    } catch (err) {
+      console.error("Failed to load books", err);
+      setError("Unable to load books right now.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -94,43 +120,114 @@ useEffect(() => {
 }, [searchTerm, selectedCategory, minPrice, maxPrice]);
 ```
 
-### Real response shape
+### Step 3: map the backend response to the UI structure
+
+The current component expects fields like:
+
+- `book.id`
+- `book.title`
+- `book.author`
+- `book.price`
+- `book.rating`
+- `book.category`
+- `book.cover`
+- `book.description`
+
+But the backend returns different field names.
+
+#### Backend fields
 
 ```json
 {
-  "success": true,
-  "data": {
-    "books": [],
-    "pagination": {
-      "totalBooks": 10,
-      "totalPages": 2,
-      "currentPage": 1,
-      "limit": 10
-    }
+  "_id": "64abc...",
+  "title": "Atomic Habits",
+  "author": "James Clear",
+  "price": 450,
+  "description": "A practical framework...",
+  "coverImage": "https://...",
+  "category": {
+    "name": "Self-Help"
   }
+}
+```
+
+#### Frontend-friendly mapping
+
+```js
+const mappedBooks = (result?.books || []).map((book) => ({
+  id: book._id,
+  title: book.title,
+  author: book.author,
+  price: book.price,
+  rating: book.rating || 4.7,
+  category: book.category?.name || book.category,
+  cover: book.coverImage || book.cover,
+  description: book.description,
+}));
+```
+
+Then use:
+
+```js
+setBooks(mappedBooks);
+```
+
+### Step 4: render the real books
+
+Replace the mock array with the real `books` state:
+
+```jsx
+{
+  loading ? (
+    <p>Loading books...</p>
+  ) : error ? (
+    <p>{error}</p>
+  ) : books.length > 0 ? (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {books.map((book) => (
+        <BookCard
+          key={book.id}
+          book={book}
+          onQuickPreview={(selected) => setPreviewBook(selected)}
+        />
+      ))}
+    </div>
+  ) : (
+    <p>No books found.</p>
+  );
 }
 ```
 
 ---
 
-## 4. Book details page
+## 4. How to connect the Book Details page
 
-### Current problem
+The page [client/src/pages/BookDetails.jsx](client/src/pages/BookDetails.jsx) currently uses mock data.
 
-The page [client/src/pages/BookDetails.jsx](client/src/pages/BookDetails.jsx) uses mock book data.
-
-### Replace with real book details
+### Backend route
 
 - Endpoint: `GET /api/v1/books/:id`
+
+### Example implementation
 
 ```js
 useEffect(() => {
   const fetchBook = async () => {
     try {
       const response = await api.get(`/books/${id}`);
-      setBook(response.data?.data);
-    } catch (error) {
-      console.error("Failed to load book", error);
+      const bookData = response.data?.data;
+
+      setBook({
+        id: bookData._id,
+        title: bookData.title,
+        author: bookData.author,
+        price: bookData.price,
+        description: bookData.description,
+        category: bookData.category?.name || bookData.category,
+        cover: bookData.coverImage || bookData.cover,
+      });
+    } catch (err) {
+      console.error("Failed to load book details", err);
     }
   };
 
@@ -140,35 +237,38 @@ useEffect(() => {
 
 ---
 
-## 5. Search page
+## 5. How to connect the Search page
 
-### Current problem
+The Search page should call the books API with a search keyword.
 
-The page [client/src/pages/Search.jsx](client/src/pages/Search.jsx) uses mock books.
-
-### Replace with real search result data
+### Backend route
 
 - Endpoint: `GET /api/v1/books?keyword=...`
+
+### Example
 
 ```js
 const response = await api.get("/books", {
   params: { keyword: query },
 });
 
-setResults(response.data?.data?.books || []);
+const results = response.data?.data?.books || [];
 ```
 
 ---
 
-## 6. Cart page
+## 6. How to connect the Cart page
 
-### Current problem
+The cart page currently stores data locally in state. To make it real, use the cart backend routes.
 
-The page [client/src/pages/Cart.jsx](client/src/pages/Cart.jsx) uses local mock state.
+### Backend routes
 
-### Replace with real cart data
+- `GET /api/v1/cart` → fetch the cart
+- `POST /api/v1/cart/:bookId` → add an item
+- `PATCH /api/v1/cart/:bookId` → update quantity
+- `DELETE /api/v1/cart/:bookId` → remove item
 
-- Endpoint: `GET /api/v1/cart`
+### Fetch cart
 
 ```js
 const response = await api.get("/cart");
@@ -178,15 +278,11 @@ setCartItems(cartData?.cart?.items || []);
 
 ### Add item to cart
 
-- Endpoint: `POST /api/v1/cart/:bookId`
-
 ```js
 await api.post(`/cart/${bookId}`, { quantity: 1 });
 ```
 
 ### Update quantity
-
-- Endpoint: `PATCH /api/v1/cart/:bookId`
 
 ```js
 await api.patch(`/cart/${bookId}`, { quantity: newQty });
@@ -194,65 +290,48 @@ await api.patch(`/cart/${bookId}`, { quantity: newQty });
 
 ### Remove item
 
-- Endpoint: `DELETE /api/v1/cart/:bookId`
-
 ```js
 await api.delete(`/cart/${bookId}`);
 ```
 
 ---
 
-## 7. Wishlist page
+## 7. How to connect the Wishlist page
 
-### Current problem
+The wishlist page should use the wishlist API.
 
-The page [client/src/pages/Wishlist.jsx](client/src/pages/Wishlist.jsx) uses mock wishlist items.
+### Backend routes
 
-### Replace with real wishlist data
+- `GET /api/v1/wishlist` → fetch wishlist
+- `POST /api/v1/wishlist/:bookId` → add to wishlist
+- `DELETE /api/v1/wishlist/:bookId` → remove from wishlist
 
-- Endpoint: `GET /api/v1/wishlist`
+### Fetch wishlist
 
 ```js
 const response = await api.get("/wishlist");
 setWishlistItems(response.data?.data?.books || []);
 ```
 
-### Add to wishlist
-
-- Endpoint: `POST /api/v1/wishlist/:bookId`
-
-```js
-await api.post(`/wishlist/${bookId}`);
-```
-
-### Remove from wishlist
-
-- Endpoint: `DELETE /api/v1/wishlist/:bookId`
-
-```js
-await api.delete(`/wishlist/${bookId}`);
-```
-
 ---
 
-## 8. Profile page
+## 8. How to connect the Profile page
 
-### Current problem
+The profile page should show the user’s purchased library and allow downloads.
 
-The page [client/src/pages/Profile.jsx](client/src/pages/Profile.jsx) is partially connected, but it should use real library data.
+### Backend routes
 
-### Fetch user library
+- `GET /api/v1/library` → fetch purchased books
+- `GET /api/v1/library/:bookId/access` → stream the PDF
 
-- Endpoint: `GET /api/v1/library`
+### Fetch library
 
 ```js
 const response = await api.get("/library");
 setLibrary(response.data?.data || []);
 ```
 
-### Download PDF from library
-
-- Endpoint: `GET /api/v1/library/:bookId/access`
+### Download PDF
 
 ```js
 const response = await api.get(`/library/${bookId}/access`, {
@@ -262,20 +341,59 @@ const response = await api.get(`/library/${bookId}/access`, {
 
 ---
 
-## 9. Checkout and payment page
+## 9. How to connect authentication pages
+
+### Login
+
+Route:
+
+- `POST /api/v1/users/login`
+
+```js
+const response = await api.post("/users/login", {
+  email,
+  password,
+});
+
+const { user, accessToken } = response.data.data;
+localStorage.setItem("accessToken", accessToken);
+localStorage.setItem("user", JSON.stringify(user));
+```
+
+### Register
+
+Route:
+
+- `POST /api/v1/users/register`
+
+```js
+await api.post("/users/register", {
+  name,
+  email,
+  password,
+});
+```
+
+---
+
+## 10. How to connect checkout and payments
 
 ### Create payment order
 
-- Endpoint: `POST /api/v1/orders/create-order`
+Route:
+
+- `POST /api/v1/orders/create-order`
 
 ```js
 const response = await api.post("/orders/create-order");
-const { razorpayOrderId, amount } = response.data.data;
+const orderData = response.data?.data;
 ```
 
 ### Verify payment
 
-- Endpoint: `POST /api/v1/orders/verify-payment`
+Route:
+
+- `POST /api/v1/orders/verify-payment`
 
 ```js
 await api.post("/orders/verify-payment", {
@@ -285,75 +403,91 @@ await api.post("/orders/verify-payment", {
 });
 ```
 
-### View order history
-
-- Endpoint: `GET /api/v1/orders/history`
-
-```js
-const response = await api.get("/orders/history");
-setOrders(response.data?.data || []);
-```
-
 ---
 
-## 10. Admin page
+## 11. Best practice for real frontend API work
 
-### Admin dashboard
+When replacing mock data in any page, follow this pattern:
 
-- Endpoint: `GET /api/v1/admin/stats`
+1. Create state for API data
+2. Fetch data with `useEffect`
+3. Handle loading
+4. Handle error
+5. Map backend fields to your component’s expected shape
+6. Show the real data instead of hard-coded arrays
 
-```js
-const response = await api.get("/admin/stats");
-setStats(response.data?.data);
-```
-
----
-
-## 11. Best practice for replacing mock data
-
-When replacing mock data:
-
-1. Remove hard-coded arrays from the page.
-2. Add `useState` for real API data.
-3. Fetch data inside `useEffect`.
-4. Show loading and error states.
-5. Use `try/catch` for API failures.
-
-Example pattern:
+### Reusable pattern
 
 ```js
-const [books, setBooks] = useState([]);
+const [data, setData] = useState([]);
 const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
 
 useEffect(() => {
-  const loadBooks = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       const response = await api.get("/books");
-      setBooks(response.data?.data?.books || []);
-    } catch (error) {
-      console.error(error);
+      setData(response.data?.data?.books || []);
+    } catch (err) {
+      setError("Failed to load data");
     } finally {
       setLoading(false);
     }
   };
 
-  loadBooks();
+  loadData();
 }, []);
 ```
 
 ---
 
-## 12. Summary of real backend routes
+## 12. Common problems and fixes
+
+### Problem: CORS error
+
+Fix:
+
+```env
+CORS_ORIGIN=http://localhost:5173
+```
+
+### Problem: 401 Unauthorized
+
+Fix:
+
+- make sure the user is logged in
+- check that the access token exists
+- verify the backend auth middleware is working
+
+### Problem: data is empty
+
+Fix:
+
+- check whether the backend actually returns data
+- inspect `response.data` in the browser console
+- confirm the route is correct
+
+### Problem: fields do not match the UI
+
+Fix:
+
+- map backend field names to the UI field names
+- use `coverImage` instead of `cover`
+- use `category.name` instead of raw category data
+
+---
+
+## 13. Summary of the main routes
 
 - Books: `/books`
-- Book details: `/books/:id`
+- Book detail: `/books/:id`
 - Categories: `/categories`
-- Users: `/users/login`, `/users/register`, `/users/logout`
+- Auth: `/users/login`, `/users/register`, `/users/logout`
 - Cart: `/cart`
 - Wishlist: `/wishlist`
 - Library: `/library`
 - Orders: `/orders/create-order`, `/orders/verify-payment`, `/orders/history`
 - Admin: `/admin/stats`
 
-This is the main path to make the frontend fully use real backend data instead of mock data.
+This is the main workflow to make the frontend use real backend data instead of mock data.

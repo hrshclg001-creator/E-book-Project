@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from "react";
 import BookCard from "../components/BookCard";
 import BookPreviewModal from "../components/BookPreviewModal";
-
+import api from "../services/api"; // Aapka axios instance
+import toast from "react-hot-toast";
 // Mock Book Dataset with Ratings & Categories
 const mockBooks = [
   {
@@ -81,6 +82,7 @@ const mockBooks = [
 const categories = ["All", "Academic", "Classic", "Sci-Fi", "Self-Help"];
 
 const Books = () => {
+  
   // Filter & Search States
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
