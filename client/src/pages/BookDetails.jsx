@@ -5,52 +5,52 @@ import { useEffect } from "react";
 import { getBookById } from "../api/books.api";
 
 // Wahi same mock data jo Books.jsx mein use kiya tha
-const mockBooks = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    price: 299,
-    category: "Classic",
-    cover:
-      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop",
-    description:
-      "A true classic of twentieth-century literature, this edition has been updated by Fitzgerald scholar James L.W. West III to include the author’s final revisions and features a note on the composition and text, a personal history of the novel.",
-  },
-  {
-    id: 2,
-    title: "Deep Learning",
-    author: "Ian Goodfellow",
-    price: 899,
-    category: "Academic",
-    cover:
-      "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=800&auto=format&fit=crop",
-    description:
-      "An introduction to a broad range of topics in deep learning, covering mathematical and conceptual background, deep learning techniques used in industry, and research perspectives.",
-  },
-  {
-    id: 3,
-    title: "Atomic Habits",
-    author: "James Clear",
-    price: 450,
-    category: "Self-Help",
-    cover:
-      "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop",
-    description:
-      "No matter your goals, Atomic Habits offers a proven framework for improving--every day. James Clear, one of the world's leading experts on habit formation, reveals practical strategies that will teach you exactly how to form good habits.",
-  },
-  {
-    id: 4,
-    title: "Dune",
-    author: "Frank Herbert",
-    price: 599,
-    category: "Sci-Fi",
-    cover:
-      "https://images.unsplash.com/photo-1614213193960-e4b9d0dc6a06?q=80&w=800&auto=format&fit=crop",
-    description:
-      "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the 'spice' melange.",
-  },
-];
+// const mockBooks = [
+//   {
+//     id: 1,
+//     title: "The Great Gatsby",
+//     author: "F. Scott Fitzgerald",
+//     price: 299,
+//     category: "Classic",
+//     cover:
+//       "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "A true classic of twentieth-century literature, this edition has been updated by Fitzgerald scholar James L.W. West III to include the author’s final revisions and features a note on the composition and text, a personal history of the novel.",
+//   },
+//   {
+//     id: 2,
+//     title: "Deep Learning",
+//     author: "Ian Goodfellow",
+//     price: 899,
+//     category: "Academic",
+//     cover:
+//       "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "An introduction to a broad range of topics in deep learning, covering mathematical and conceptual background, deep learning techniques used in industry, and research perspectives.",
+//   },
+//   {
+//     id: 3,
+//     title: "Atomic Habits",
+//     author: "James Clear",
+//     price: 450,
+//     category: "Self-Help",
+//     cover:
+//       "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "No matter your goals, Atomic Habits offers a proven framework for improving--every day. James Clear, one of the world's leading experts on habit formation, reveals practical strategies that will teach you exactly how to form good habits.",
+//   },
+//   {
+//     id: 4,
+//     title: "Dune",
+//     author: "Frank Herbert",
+//     price: 599,
+//     category: "Sci-Fi",
+//     cover:
+//       "https://images.unsplash.com/photo-1614213193960-e4b9d0dc6a06?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the 'spice' melange.",
+//   },
+// ];
 
 const BookDetails = () => {
   const { id } = useParams();
@@ -80,14 +80,28 @@ const BookDetails = () => {
     fetchBook();
   }, [id]);
 
-  if (loading) {
-    return <h2>Loading...</h2>;
-  }
+if (loading) {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <h2 className="text-xl font-semibold">Loading book...</h2>
+    </div>
+  );
+}
 
-  if (error) {
-    return <h2>{error}</h2>;
-  }
-
+if (error) {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <h2 className="text-red-500 text-xl">{error}</h2>
+    </div>
+  );
+}
+if (!book) {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <h2>Book not found.</h2>
+    </div>
+  );
+}
 
   const handleAddToCart = () => {
     // Yahan Redux/Context API ka logic aayega
@@ -129,7 +143,7 @@ const BookDetails = () => {
           {/* Right: Book Info */}
           <div className="flex flex-col justify-start pt-4">
             <span className="text-xs font-sans font-bold tracking-widest text-book-rust uppercase mb-3">
-              {book.category}
+              {book.category?.name}
             </span>
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-book-text leading-tight mb-2">
               {book.title}

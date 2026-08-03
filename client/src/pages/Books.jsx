@@ -1,88 +1,91 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo,useEffect } from "react";
 import BookCard from "../components/BookCard";
 import BookPreviewModal from "../components/BookPreviewModal";
 import api from "../services/api"; // Aapka axios instance
+import { getAllBooks } from "../api/books.api";
 import toast from "react-hot-toast";
 // Mock Book Dataset with Ratings & Categories
-const mockBooks = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    price: 299,
-    rating: 4.8,
-    category: "Classic",
-    cover:
-      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop",
-    description:
-      "A classic novel set in the Roaring Twenties, exploring themes of wealth, love, and the American Dream.",
-  },
-  {
-    id: 2,
-    title: "Deep Learning",
-    author: "Ian Goodfellow",
-    price: 899,
-    rating: 4.9,
-    category: "Academic",
-    cover:
-      "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=800&auto=format&fit=crop",
-    description:
-      "An introductory textbook to deep learning concepts, neural network architectures, and practical applications.",
-  },
-  {
-    id: 3,
-    title: "Atomic Habits",
-    author: "James Clear",
-    price: 450,
-    rating: 4.7,
-    category: "Self-Help",
-    cover:
-      "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop",
-    description:
-      "A practical framework for forming good habits, breaking bad ones, and mastering small behaviors.",
-  },
-  {
-    id: 4,
-    title: "Dune",
-    author: "Frank Herbert",
-    price: 599,
-    rating: 4.6,
-    category: "Sci-Fi",
-    cover:
-      "https://images.unsplash.com/photo-1614213193960-e4b9d0dc6a06?q=80&w=800&auto=format&fit=crop",
-    description:
-      "Set on the desert planet Arrakis, telling the epic story of young Paul Atreides and the battle for spice.",
-  },
-  {
-    id: 5,
-    title: "Clean Code",
-    author: "Robert C. Martin",
-    price: 750,
-    rating: 4.5,
-    category: "Academic",
-    cover:
-      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop",
-    description:
-      "A handbook of agile software craftsmanship with best practices for writing maintainable code.",
-  },
-  {
-    id: 6,
-    title: "1984",
-    author: "George Orwell",
-    price: 350,
-    rating: 4.9,
-    category: "Classic",
-    cover:
-      "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=800&auto=format&fit=crop",
-    description:
-      "A dystopian social science fiction novel that deals with totalitarianism and mass surveillance.",
-  },
-];
+// const mockBooks = [
+//   {
+//     id: 1,
+//     title: "The Great Gatsby",
+//     author: "F. Scott Fitzgerald",
+//     price: 299,
+//     rating: 4.8,
+//     category: "Classic",
+//     cover:
+//       "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "A classic novel set in the Roaring Twenties, exploring themes of wealth, love, and the American Dream.",
+//   },
+//   {
+//     id: 2,
+//     title: "Deep Learning",
+//     author: "Ian Goodfellow",
+//     price: 899,
+//     rating: 4.9,
+//     category: "Academic",
+//     cover:
+//       "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "An introductory textbook to deep learning concepts, neural network architectures, and practical applications.",
+//   },
+//   {
+//     id: 3,
+//     title: "Atomic Habits",
+//     author: "James Clear",
+//     price: 450,
+//     rating: 4.7,
+//     category: "Self-Help",
+//     cover:
+//       "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "A practical framework for forming good habits, breaking bad ones, and mastering small behaviors.",
+//   },
+//   {
+//     id: 4,
+//     title: "Dune",
+//     author: "Frank Herbert",
+//     price: 599,
+//     rating: 4.6,
+//     category: "Sci-Fi",
+//     cover:
+//       "https://images.unsplash.com/photo-1614213193960-e4b9d0dc6a06?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "Set on the desert planet Arrakis, telling the epic story of young Paul Atreides and the battle for spice.",
+//   },
+//   {
+//     id: 5,
+//     title: "Clean Code",
+//     author: "Robert C. Martin",
+//     price: 750,
+//     rating: 4.5,
+//     category: "Academic",
+//     cover:
+//       "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "A handbook of agile software craftsmanship with best practices for writing maintainable code.",
+//   },
+//   {
+//     id: 6,
+//     title: "1984",
+//     author: "George Orwell",
+//     price: 350,
+//     rating: 4.9,
+//     category: "Classic",
+//     cover:
+//       "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=800&auto=format&fit=crop",
+//     description:
+//       "A dystopian social science fiction novel that deals with totalitarianism and mass surveillance.",
+//   },
+// ];
 
 const categories = ["All", "Academic", "Classic", "Sci-Fi", "Self-Help"];
 
 const Books = () => {
-  
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   // Filter & Search States
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -114,7 +117,22 @@ const Books = () => {
         return b.id - a.id; // 'latest' default
       });
   }, [searchTerm, selectedCategory, maxPrice, minRating, sortBy]);
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+const fetchBooks = async () => {
+  try {
+    setLoading(true);
 
+    const data = await getAllBooks();
+
+    setBooks(data.books);
+  } catch (err) {
+    setError(err.response?.data?.message || "Failed to load books.");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="w-full bg-book-cream min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

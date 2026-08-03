@@ -19,7 +19,7 @@ const BookPreviewModal = ({ book, onClose }) => {
           {/* Left: Book Cover */}
           <div className="bg-book-gray/20 p-6 flex items-center justify-center">
             <img
-              src={book.cover}
+              src={book.coverImage}
               alt={book.title}
               className="max-h-72 object-cover shadow-lg rounded-sm"
             />
@@ -29,7 +29,7 @@ const BookPreviewModal = ({ book, onClose }) => {
           <div className="p-6 flex flex-col justify-between">
             <div>
               <span className="text-[10px] font-sans font-bold tracking-widest text-book-rust uppercase">
-                {book.category}
+                {book.category?.name}
               </span>
               <h2 className="font-serif text-2xl font-bold text-book-text mt-1">
                 {book.title}
@@ -56,7 +56,7 @@ const BookPreviewModal = ({ book, onClose }) => {
                 ₹{book.price}
               </span>
               <Link
-                to={`/books/${book.id}`}
+                to={`/books/${book._id}`}
                 onClick={onClose}
                 className="bg-book-teal hover:bg-book-text text-white font-sans text-xs px-4 py-2.5 rounded-sm transition-colors"
               >

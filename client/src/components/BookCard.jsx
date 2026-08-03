@@ -7,7 +7,7 @@ const BookCard = ({ book, onQuickPreview }) => {
       {/* Book Cover Image Container */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-book-gray/30">
         <img
-          src={book.cover}
+          src={book.coverImage}
           alt={book.title}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
         />
@@ -24,13 +24,13 @@ const BookCard = ({ book, onQuickPreview }) => {
 
         {/* Category Badge */}
         <span className="absolute top-3 left-3 bg-book-rust text-white text-[10px] font-sans font-bold tracking-widest uppercase px-2 py-0.5 rounded-sm">
-          {book.category}
+          {book.category?.name}
         </span>
       </div>
 
       {/* Book Info */}
       <div className="p-4 flex flex-col flex-grow">
-        <Link to={`/books/${book.id}`}>
+        <Link to={`/books/${book._id}`}>
           <h3 className="font-serif text-lg font-bold text-book-text leading-tight mb-1 group-hover:text-book-teal transition-colors truncate">
             {book.title}
           </h3>
